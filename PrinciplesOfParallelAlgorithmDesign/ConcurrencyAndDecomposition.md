@@ -16,3 +16,27 @@ Typical Design Steps:
     - Nodes: Represent individual tasks.
     - Edges: Represent control dependencies (which task must finish before another starts)
 
+### Key Performance Metrics
+
+- Critical Path: The longest weighted path of dependent tasks in the DAG. This determines the shortest possible execution time.
+
+- Degree of Concurrency: The number of tasks that can be executed simultaneously at any given time.
+
+Granularity:
+
+* Fine-grained: Many small tasks; high concurrency but high overhead.
+* Coarse-grained: Fewer, larger tasks; lower overhead but potentially less concurrency.
+
+### Decomposition Techniques
+
+##### A. Recursive Decomposition
+- Used for Divide-and-Conquer problems.
+- A problem is broken into sub-problems, which are solved concurrently.
+- Examples: Quicksort, finding the minimum of a list.
+
+##### B. Data Decomposition
+* Tasks are partitioned based on the data they handle.
+* Types of Data Partitioning:
+    - Output Data: Each task computes a specific portion of the result (e.g., a specific row in matrix multiplication).
+    - Input Data: Each task processes a specific portion of the input (e.g., counting frequencies in a partitioned string).
+    - Intermediate Data: Partitioning data created during middle stages of a calculation.
