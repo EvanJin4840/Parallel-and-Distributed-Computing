@@ -35,3 +35,33 @@
   $$T = (t_s + t_w \cdot m) (p - 1)$$
 * **Mesh Network:** Row-wise broadcast (Phase 1) followed by column-wise broadcast of the merged results (Phase 2).
   $$T = 2 t_s (\sqrt{p} - 1) + t_w \cdot m (p - 1)$$
+
+## 4. All-Reduce & Prefix-Sum Operations
+
+### All-Reduce
+* **Concept:** Combines data from all processes and distributes the final reduction result back to all processes.
+* **Naïve Method:** Utilizing an All-to-All broadcast causes highly bursty network congestion and fails to scale.
+* **Ring All-Reduce:** The de facto standard for distributed ML / GPU training. It operates via:
+  1. **Reduce-Scatter:** ($p - 1$ steps) Nodes exchange $p$ divided equal-size chunks to compute partial reduction results.
+  2. **All-Gather:** ($p - 1$ steps) Nodes circulate the completed chunks to fully rebuild the unified global array on all devices.
+
+
+
+### Prefix-Sum (Scan)
+* **Goal:** Given $p$ numbers ($n_0, n_1, \dots, n_{p-1}$), compute the running cumulative sum $s_k = \sum_{i=0}^{k} n_i$ on node $k$.
+* **Implementation:** Uses a modified all-to-all reduction kernel with an additional buffer to selectively add incoming values **only** if they originate from a node index $\le k$.
+
+---
+
+## 5. Scatter, Gather, and All-to-All Personalized Communication
+
+### Scatter vs. Gather
+* **Scatter:** A single root node distributes a **unique** message of size $m$ to every individual node (One-to-all personalized communication). Unlike a standard broadcast, the message size transmitted halves at each logical step.
+* **Gather:** The exact inverse of Scatter; a single target node collects unique data parts from all other nodes.
+* **Time Complexity (Hypercube):**
+  $$T = t_s \log p + t_w \cdot m (p - 1)$$ 
+
+### All-to-All Personalized Communication (Total Exchange)
+* **Concept:** Every single node sends a distinct, personalized piece of data to every other node.
+* **Real-world Example:** Matrix Transposition (where each process holds a row and must shuffle elements into corresponding columns).
+* **Ring Cost Analysis:** $$T = \left( t_s + t_w \cdot m \cdot \frac{p}{2} \right) (p - 1)$$
